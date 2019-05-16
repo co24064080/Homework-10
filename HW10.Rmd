@@ -1,0 +1,346 @@
+---
+title: "HW10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*參考書目：A First Course in Statistical Programming with R*
+
+
+##CH2 Introduction to the R language
+
+###基礎四則運算
+
+符號|意義
+------|------
++|加
+-|減
+*|乘
+/|除
+^|次方
+%%|餘數
+%/%|整除部分
+
+
+###控制一行長度
+例：
+```{r}
+options(width=40)
+1:20
+```
+
+###尋求說明
+在欲了解之功能前加上**?**或者將其加在**help()**之括弧處即可
+
+###結束R程式
+```
+q()
+```
+
+###命名並儲存值
+```
+=
+<-
+```
+
+###查看目前所存物件
+```
+ls()
+object()
+```
+###移除所存物件
+括弧中放入欲移除之物件
+```
+rm()
+```
+
+###向量
+```
+c()
+```
+例：
+```{r}
+c(0,10,20)
+```
+
+###數列
+* seq()
+    + seq(a,b,by=t)
+
+變數|意義
+------|------
+a|開始之數字
+b|結束之數字
+t|公差
+
+* rep()
+    + rep(c,x)
+
+變數|意義
+------|------
+c|常數
+x|重複之次數
+
+* 例：
+```{r}
+seq(11,30,by=3)
+rep(10,5)
+```
+
+###矩陣
+* matrix()
+    + matrix(data, nrow, ncol, byrow)
+
+變數|意義
+------|------
+data|組成矩陣之數字
+nrow|row的數量
+ncol|column的數量
+byrow|系統原先預設排列方式為填滿一個column之後再排下一個，透過此項設定 T/F 可控制先填滿 row/column
+
+* 例：
+```{r}
+matrix(20:39,nrow=2,ncol=10,byrow=F)
+matrix(20:39,nrow=2,ncol=10,byrow=T)
+```
+
+
+##CH3 Programming statistical graphics
+
+###High-level plots
+
+####可用圖形
+```
+barplot()
+dotchart
+pie()
+hist()
+boxplot()
+plot()
+qqplot()
+```
+
+####範例
+*圖形之繪製方式皆大同小異，如想知道更詳細可用* **help()** *獲得資訊*
+*以下以R內建資料VADeaths為例，繪製barplot及dotchart*
+
+```{r VADeaths}
+
+barplot(VADeaths, beside=TRUE, legend=TRUE, ylim=c(0,90),
+ ylab="Death per 1000",
+ main="Death rates in Virginia")
+
+dotchart(VADeaths,xlim=c(0,75),
+ xlab="Deaths per 1000",
+ main="Death rates in Virginia")
+```
+
+
+###Low-level graphics functions
+
+* par()
+    + 建立繪圖區，可設定與邊界之距離
+
+* plot()
+    + plot(x,y,xlab,ylab,type)
+    + 另可用**curve()**增加線條於圖上
+    
+變數|意義
+------|------
+x|x軸資料
+y|y軸資料
+xlab|x軸命名
+ylab|y軸命名
+type|圖形之顯示，因較為複雜故列於下表
+
+type代號|顯示
+-----|------
+"p" | points
+"l" | lines
+"b" | both
+"c" | the lines part alone of "b"
+"o" | both ‘overplotted’
+"h" | ‘histogram’ like (or ‘high-density’) vertical lines
+"s" | stair steps
+"S" | other steps, see ‘Details’ below
+"n" | no plotting.
+
+* text()
+    + 選定x,y座標，並寫入標題名稱
+
+* points()
+    + 選定x,y座標
+ 
+####範例：
+下列使用上述函式，並標註部分系統預設(如邊界順序等)
+```{r}
+par(mar=c(5,6,10,7)+0.1)
+plot(c(1,9),c(0,50),type="n",xlab="",ylab="")
+
+text(6,40,"Plot region")
+points(6,20)
+mtext(paste("Margin",1:4),side=1:4,line=3)
+mtext(paste("Line",0:4),side=1,line=0:4,at=3,cex=0.6)
+mtext(paste("Line",0:4),side=2,line=0:4,at=15,cex=0.6)
+mtext(paste("Line",0:10),side=2,line=0:10,at=3,cex=0.6)
+mtext(paste("Line",0:7),side=4,line=0:7,at=15,cex=0.6)
+```
+
+##CH4 Programming with R
+
+###函式
+
+*  function(){}
+    + 此函式可用於定義某些不內建於系統，但可能需要多次使用的式子
+    + 可在小括號中列出需輸入之變數
+    + 大括號中則定義此自訂函數所做運算
+    + 以**return()**控制回傳之數據
+
+* for(){}
+   + 小括號中放入範圍(如 i<10 等)
+   + 大括號中放入須執行之動作
+
+* if(){}
+   + 小括號中放入條件
+   + 大括號中放入符合條件時須執行之動作
+   + 若不符合條件者須執行其他動作，則搭配使用**else{}**
+
+####範例
+```{r}
+Eratosthenes <- function(n) {
+  #Return all prime numbers up to n (based on the sieve of Eratosthenes)
+  if (n >=2) {
+    sieve <- seq(2,n)
+    primes <- c()
+    for (i in seq(2,n)) {
+      if (any(sieve==i)) {
+        primes <- c(primes,i)
+        sieve <- c(sieve[(sieve%%i)!=0],i)
+      }
+    }
+    return(primes)
+  } else {
+      stop("Input value of n should be at least 2.")
+  }
+}
+```
+
+##CH5 Simulation
+
+###random variables
+
+```
+runif()
+rbinom()
+rpois()
+rnorm()
+rexp()
+```
+
+* 透過**set.seed()**的方式，可使每次隨機取出之數字相同
+
+* sample(x,size,replace)
+
+變數|意義
+------|------
+x|欲隨即抽樣之範圍
+size|取出之樣本數
+replace|是否取出放回
+
+
+##CH6 Computational linear algebra
+
+###矩陣
+
+* matrix()
+    + 詳見CH2
+
+* cbind()
+    + 括號放入向量
+
+###呼叫矩陣之部分
+假設今有一矩陣X
+
+* X[a,b]
+    + 若其中一個未放置數字，則會出現一整行/列
+
+符號|意義
+-------|-----
+a|row
+b|column
+
+####範例
+```{r}
+X= matrix(c(1,2,3,1,4,9),ncol=2)
+
+X[,2]
+X[,2,drop=F]
+```
+
+* rownames()、colnames()
+    + 為row、column 命名
+
+* diag()
+    + 列出矩陣之對角線數值
+    + 
+
+* %*%
+    + 用於矩陣相乘
+
+* t()
+    + 轉置矩陣
+
+* solve()
+    + 若直接放一個矩陣，可得其反矩陣
+    + 若Ax=x,則x=solve(A,b)
+
+
+##CH7 Numerical optimization
+
+###The golden section
+
+####範例
+
+```{r}
+f <- function(x) {
+  abs(x - 3.5) + abs(x - 2) + abs(x - 1)
+}
+
+golden <- function (f, a, b, tol = 0.0000001) {
+  ratio <- 2 / (sqrt(5) + 1)
+  x1 <- b - ratio * (b - a)
+  x2 <- a + ratio * (b - a)
+  f1 <- f(x1)
+  f2 <- f(x2)
+  while(abs(b - a) > tol) {
+    if (f2 > f1) {
+      b <- x2
+      x2 <- x1
+      f2 <- f1
+      x1 <- b - ratio * (b - a)
+      f1 <- f(x1)
+    } else {
+      a <- x1
+      x1 <- x2
+      f1 <- f2
+      x2 <- a + ratio * (b - a)
+      f2 <- f(x2)
+    }
+  }
+  return((a + b) / 2)
+}
+```
+
+###使用已存在之packages
+
+* 先找尋所需package之名稱，再將其依序放入下列兩個括號
+    + install.packages()
+    + library()
+
+
+
+
+
